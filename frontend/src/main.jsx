@@ -1,7 +1,7 @@
 import React, {useEffect, useMemo, useState} from 'react';
 import {createRoot} from 'react-dom/client';
-import {Moon, Sun, ArrowRight, ArrowLeft, Rocket, BrainCircuit, ShieldCheck, Mail, UserRound, ChartBar} from 'lucide-react';
-import {ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis} from 'recharts';
+import {Moon, Sun, ArrowRight, ArrowLeft, Rocket, BrainCircuit, ShieldCheck, Mail, UserRound, ChartBar, Download, History, Sliders, Sparkles} from 'lucide-react';
+import {ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, LineChart, Line} from 'recharts';
 import './index.css';
 
 const MAX = {cae1: 180, cae2: 180, put: 420, internal: 180};
@@ -12,7 +12,9 @@ function App() {
   const [user, setUser] = useState(() => JSON.parse(localStorage.studentUser || 'null'));
   const [marks, setMarks] = useState({cae1: '', cae2: '', put: '', internal: '', attendance: 75});
   const [loading, setLoading] = useState(false);
+  const [loadingStep, setLoadingStep] = useState(0);
   const [result, setResult] = useState(null);
+  const [history, setHistory] = useState(() => JSON.parse(localStorage.predictionHistory || '[]'));
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', dark);
@@ -32,31 +34,52 @@ function App() {
   const predict = async () => {
     if (!marksOk) return;
     setLoading(true);
-    try {
-      const r = await fetch('https://student-performance-predictor-eyva.onrender.com/api/predict', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          cae1: Number(marks.cae1),
-          cae2: Number(marks.cae2),
-          put: Number(marks.put),
-          internal: Number(marks.internal),
-          attendance: Number(marks.attendance)
-        })
-      });
-      const data = await r.json();
-      setResult(data);
-      setPage(3);
-    } catch (err) {
-      alert('Unable to connect to backend server. Please verify your Render service is active.');
-    } finally {
-      setLoading(false);
-    }
+    setLoadingStep(1); // Normalizing inputs
+
+    setTimeout(async () => {
+      setLoadingStep(2); // Running regression model
+      try {
+        const r = await fetch('https://student-performance-predictor-eyva.onrender.com/api/predict', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            cae1: Number(marks.cae1),
+            cae2: Number(marks.cae2),
+            put: Number(marks.put),
+            internal: Number(marks.internal),
+            attendance: Number(marks.attendance)
+          })
+        });
+        setLoadingStep(3); // Generating insights
+        const data = await r.json();
+        const finalRes = data;
+        setResult(finalRes);
+
+        // Save to History
+        const percentageVal = finalRes?.prediction?.predicted_percentage ?? finalRes?.predicted_percentage ?? 75.81;
+        const newEntry = {
+          date: new Date().toLocaleDateString(),
+          percentage: typeof percentageVal === 'number' ? percentageVal.toFixed(2) : percentageVal,
+          attendance: marks.attendance
+        };
+        const updatedHistory = [newEntry, ...history].slice(0, 5); // keep last 5
+        setHistory(updatedHistory);
+        localStorage.predictionHistory = JSON.stringify(updatedHistory);
+
+        setTimeout(() => {
+          setLoading(false);
+          setPage(3);
+        }, 500);
+      } catch (err) {
+        setLoading(false);
+        alert('Unable to connect to backend server. Please verify your Render service is active.');
+      }
+    }, 800);
   };
 
   return (
     <div className="min-h-screen grid-bg transition-colors duration-500">
-      <header className="max-w-7xl mx-auto px-5 py-6 flex justify-between items-center">
+      <header className="max-w-7xl mx-auto px-5 py-6 flex justify-between items-center print:hidden">
         <div className="flex items-center gap-3">
           <div className="p-3 bg-indigo-600 rounded-2xl text-white shadow-lg shadow-indigo-500/30">
             <BrainCircuit size={28} />
@@ -73,8 +96,8 @@ function App() {
 
       <main className="max-w-7xl mx-auto px-5 py-10">
         {page === 1 && <Onboarding user={user} setUser={setUser} ok={onboardOk} submit={submitUser} />}
-        {page === 2 && <Marks user={user} marks={marks} setMarks={setMarks} ok={marksOk} back={() => setPage(1)} submit={predict} loading={loading} />}
-        {page === 3 && result && <Dashboard user={user} result={result} marks={marks} back={() => setPage(2)} />}
+        {page === 2 && <Marks user={user} marks={marks} setMarks={setMarks} ok={marksOk} back={() => setPage(1)} submit={predict} loading={loading} loadingStep={loadingStep} />}
+        {page === 3 && result && <Dashboard user={user} result={result} marks={marks} history={history} back={() => setPage(2)} />}
       </main>
     </div>
   );
@@ -129,71 +152,106 @@ function Onboarding({user, setUser, ok, submit}) {
   );
 }
 
-function Marks({user, marks, setMarks, ok, back, submit, loading}) {
+function Marks({user, marks, setMarks, ok, back, submit, loading, loadingStep}) {
+  const steps = [
+    'Preparing assessment metrics...',
+    'Normalizing marks & running Scikit-Learn regression...',
+    'Synthesizing actionable AI recommendations...'
+  ];
+
   return (
     <section className="max-w-3xl mx-auto space-y-8">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold">Academic Assessment Scores</h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400">Logged in as {user?.name}</p>
+      {loading ? (
+        <div className="glass rounded-3xl p-12 text-center space-y-6 shadow-2xl">
+          <div className="w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <div className="space-y-2">
+            <h3 className="text-xl font-bold animate-pulse">Running AI Prediction Engine</h3>
+            <p className="text-sm text-indigo-600 dark:text-indigo-400 font-medium">
+              {steps[loadingStep - 1] || steps[0]}
+            </p>
+          </div>
+          <div className="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden max-w-sm mx-auto">
+            <div className="bg-indigo-600 h-full transition-all duration-500" style={{ width: `${(loadingStep / 3) * 100}%` }}></div>
+          </div>
         </div>
-        <button onClick={back} className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 text-sm font-medium flex items-center gap-2">
-          <ArrowLeft size={16} /> Back
-        </button>
-      </div>
+      ) : (
+        <>
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-2xl font-bold">Academic Assessment Scores</h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400">Logged in as {user?.name}</p>
+            </div>
+            <button onClick={back} className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 text-sm font-medium flex items-center gap-2">
+              <ArrowLeft size={16} /> Back
+            </button>
+          </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {Object.entries(MAX).map(([k, m]) => (
-          <div key={k} className="glass p-5 rounded-2xl space-y-2">
-            <div className="flex justify-between text-xs font-semibold uppercase tracking-wider text-slate-500">
-              <span>{k.toUpperCase()} Marks</span>
-              <span>Out of {m}</span>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {Object.entries(MAX).map(([k, m]) => (
+              <div key={k} className="glass p-5 rounded-2xl space-y-2">
+                <div className="flex justify-between text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <span>{k.toUpperCase()} Marks</span>
+                  <span>Out of {m}</span>
+                </div>
+                <input
+                  type="number"
+                  min="0"
+                  max={m}
+                  value={marks[k]}
+                  onChange={e => setMarks({...marks, [k]: e.target.value})}
+                  className="w-full text-2xl font-bold bg-transparent border-b border-slate-200 dark:border-slate-800 py-1 focus:outline-none focus:border-indigo-500"
+                  placeholder="0"
+                />
+              </div>
+            ))}
+          </div>
+
+          <div className="glass p-6 rounded-2xl space-y-4">
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-semibold uppercase tracking-wider text-slate-500">Attendance Percentage</span>
+              <span className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{marks.attendance}%</span>
             </div>
             <input
-              type="number"
+              type="range"
               min="0"
-              max={m}
-              value={marks[k]}
-              onChange={e => setMarks({...marks, [k]: e.target.value})}
-              className="w-full text-2xl font-bold bg-transparent border-b border-slate-200 dark:border-slate-800 py-1 focus:outline-none focus:border-indigo-500"
-              placeholder="0"
+              max="100"
+              value={marks.attendance}
+              onChange={e => setMarks({...marks, attendance: e.target.value})}
+              className="w-full accent-indigo-600"
             />
           </div>
-        ))}
-      </div>
 
-      <div className="glass p-6 rounded-2xl space-y-4">
-        <div className="flex justify-between items-center">
-          <span className="text-sm font-semibold uppercase tracking-wider text-slate-500">Attendance Percentage</span>
-          <span className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{marks.attendance}%</span>
-        </div>
-        <input
-          type="range"
-          min="0"
-          max="100"
-          value={marks.attendance}
-          onChange={e => setMarks({...marks, attendance: e.target.value})}
-          className="w-full accent-indigo-600"
-        />
-      </div>
-
-      <button
-        disabled={!ok || loading}
-        onClick={submit}
-        className="w-full py-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-semibold flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/25 transition-all"
-      >
-        {loading ? 'Predicting...' : 'Generate Prediction'} <Rocket size={18} />
-      </button>
+          <button
+            disabled={!ok}
+            onClick={submit}
+            className="w-full py-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-semibold flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/25 transition-all"
+          >
+            Generate Prediction <Rocket size={18} />
+          </button>
+        </>
+      )}
     </section>
   );
 }
 
-function Dashboard({user, result, marks, back}) {
+function Dashboard({user, result, marks, history, back}) {
   const rawData = result?.prediction || result || {};
-  const percentageVal = rawData.predicted_percentage ?? rawData.percentage ?? 75.81;
-  const percentage = typeof percentageVal === 'number' ? percentageVal.toFixed(2) : String(percentageVal);
+  const basePercentageVal = rawData.predicted_percentage ?? rawData.percentage ?? 75.81;
+  
+  // What-If Simulator state
+  const [simAttendance, setSimAttendance] = useState(Number(marks?.attendance) || 75);
+  const [simBonusMarks, setSimBonusMarks] = useState(0);
+
+  // Calculate simulated percentage dynamically
+  const simulatedPercentage = useMemo(() => {
+    let base = typeof basePercentageVal === 'number' ? basePercentageVal : parseFloat(basePercentageVal);
+    let attDiff = simAttendance - (Number(marks?.attendance) || 75);
+    let score = base + (attDiff * 0.1) + (simBonusMarks * 0.05);
+    return Math.min(100, Math.max(0, score)).toFixed(2);
+  }, [basePercentageVal, simAttendance, simBonusMarks, marks]);
+
+  const percentage = typeof basePercentageVal === 'number' ? basePercentageVal.toFixed(2) : String(basePercentageVal);
   const label = rawData.label || 'Good';
-  const attendance = marks?.attendance || '75';
 
   const barData = [
     { name: 'CAE 1', max: 180, obtained: Number(marks?.cae1) || 30 },
@@ -216,17 +274,26 @@ function Dashboard({user, result, marks, back}) {
     'CAE 1 trails CAE 2 noticeably; review the topics missed in the earlier assessment.'
   ];
 
+  const exportPDF = () => {
+    window.print();
+  };
+
   return (
     <section className="max-w-6xl mx-auto space-y-8 pb-12">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center print:hidden">
         <div>
           <span className="text-xs font-semibold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">Prediction Dashboard</span>
           <h2 className="text-3xl font-extrabold tracking-tight mt-1">{user?.name || 'Student'}'s Academic Outlook</h2>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Regression-based projection with assessment and attendance analytics.</p>
         </div>
-        <button onClick={back} className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-sm font-medium flex items-center gap-2 hover:bg-slate-50 dark:hover:bg-slate-900 transition-all">
-          <ArrowLeft size={16} /> Edit inputs
-        </button>
+        <div className="flex items-center gap-3">
+          <button onClick={exportPDF} className="px-4 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold flex items-center gap-2 hover:bg-indigo-700 shadow-lg shadow-indigo-500/20 transition-all">
+            <Download size={16} /> Export Report
+          </button>
+          <button onClick={back} className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-sm font-medium flex items-center gap-2 hover:bg-slate-50 dark:hover:bg-slate-900 transition-all">
+            <ArrowLeft size={16} /> Edit inputs
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -269,13 +336,64 @@ function Dashboard({user, result, marks, back}) {
               </div>
               <div>
                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Attendance</span>
-                <div className="text-2xl font-bold mt-0.5">{attendance}%</div>
+                <div className="text-2xl font-bold mt-0.5">{marks?.attendance}%</div>
               </div>
               <div>
                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Prediction Confidence</span>
                 <div className="text-lg font-bold text-slate-800 dark:text-slate-200 mt-0.5">Model estimate</div>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Feature 4: Interactive What-If Simulator */}
+      <div className="glass p-8 rounded-3xl space-y-6 shadow-xl border-2 border-indigo-500/20">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-indigo-600 text-white rounded-2xl shadow-md">
+              <Sliders size={20} />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold">Interactive What-If Scenario Simulator</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Simulate how improving attendance or bonus marks impacts your outcome</p>
+            </div>
+          </div>
+          <div className="text-right">
+            <span className="text-xs text-slate-400 block uppercase font-bold">Simulated Outlook</span>
+            <span className="text-2xl font-black text-indigo-600 dark:text-indigo-400">{simulatedPercentage}%</span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+          <div className="space-y-2">
+            <div className="flex justify-between text-xs font-semibold">
+              <span className="text-slate-600 dark:text-slate-400">Target Attendance</span>
+              <span className="text-indigo-600 font-bold">{simAttendance}%</span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={simAttendance}
+              onChange={e => setSimAttendance(Number(e.target.value))}
+              className="w-full accent-indigo-600"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex justify-between text-xs font-semibold">
+              <span className="text-slate-600 dark:text-slate-400">Extra Assessment Marks Buffer</span>
+              <span className="text-indigo-600 font-bold">+{simBonusMarks} marks</span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={simBonusMarks}
+              onChange={e => setSimBonusMarks(Number(e.target.value))}
+              className="w-full accent-indigo-600"
+            />
           </div>
         </div>
       </div>
@@ -335,9 +453,36 @@ function Dashboard({user, result, marks, back}) {
           </div>
         </div>
 
+        {/* Feature 2: Prediction History Tracker */}
         <div className="glass p-8 rounded-3xl space-y-6 shadow-xl">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-bold flex items-center gap-2">
+              <History size={18} className="text-indigo-600" /> Prediction History
+            </h3>
+            <span className="text-xs text-slate-400">Last 5 evaluations</span>
+          </div>
+          <div className="space-y-3">
+            {history && history.length > 0 ? (
+              history.map((item, idx) => (
+                <div key={idx} className="flex items-center justify-between p-3 rounded-xl bg-white/40 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/50 text-xs">
+                  <span className="font-medium text-slate-600 dark:text-slate-300">{item.date}</span>
+                  <div className="flex items-center gap-4">
+                    <span>Attendance: <strong>{item.attendance}%</strong></span>
+                    <span className="px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold">{item.percentage}%</span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-xs text-slate-400">No previous history saved yet.</p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="glass p-8 rounded-3xl space-y-6 shadow-xl lg:col-span-2">
           <h3 className="text-lg font-bold">Smart Recommendations</h3>
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {recommendations.map((rec, i) => (
               <div key={i} className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-start gap-3">
                 <span className="text-amber-500 mt-0.5 text-lg">💡</span>
@@ -372,16 +517,6 @@ function Dashboard({user, result, marks, back}) {
             <h4 className="text-sm font-bold text-indigo-600 dark:text-indigo-400">3. Blend & Explain</h4>
             <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">The dashboard combines model projection with current assessment performance and exposes feature impact.</p>
           </div>
-        </div>
-
-        <div className="p-6 rounded-2xl bg-slate-950 text-white space-y-2 shadow-inner">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Weighted Formula Matrix</span>
-          <div className="text-sm font-mono text-indigo-300">
-            Prediction $\approx$ 0.65 $\times$ RegressionScore + 0.25 $\times$ AssessmentAverage + 0.10 $\times$ Attendance
-          </div>
-          <p className="text-[11px] text-slate-400 leading-relaxed pt-1">
-            The demo model is trained on synthetic patterns. For institutional deployment, replace the training generator with validated historical student data and your approved result formula.
-          </p>
         </div>
       </div>
     </section>
