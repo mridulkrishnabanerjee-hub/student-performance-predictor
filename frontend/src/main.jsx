@@ -76,73 +76,70 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-emerald-950 text-emerald-50 transition-colors duration-500">
-      {/* Background Emerald & Teal Glowing Neon Blobs */}
-      <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] rounded-full bg-emerald-500/15 blur-[140px] pointer-events-none"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-teal-500/15 blur-[140px] pointer-events-none"></div>
-
+    <div className={`min-h-screen relative overflow-hidden transition-colors duration-500 ${dark ? 'bg-neutral-950 text-neutral-100' : 'bg-neutral-50 text-neutral-900'}`}>
       <header className="max-w-7xl mx-auto px-6 py-6 flex justify-between items-center relative z-10 print:hidden">
         <div className="flex items-center gap-3 group cursor-pointer" onClick={() => setPage(1)}>
-          <div className="p-3 bg-gradient-to-tr from-emerald-600 to-teal-500 rounded-2xl text-white shadow-xl shadow-emerald-900/50 transform group-hover:scale-105 transition-transform">
+          <div className={`p-3 rounded-2xl ${dark ? 'bg-white text-black' : 'bg-black text-white'} shadow-md transform group-hover:scale-105 transition-transform`}>
             <BrainCircuit size={28} />
           </div>
           <div>
-            <h1 className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">
-              Student Predictor AI
-            </h1>
-            <p className="text-xs font-medium text-emerald-400/70">Next-gen academic intelligence</p>
+            <h1 className="text-xl font-extrabold tracking-tight">Student Predictor AI</h1>
+            <p className={`text-xs font-medium ${dark ? 'text-neutral-400' : 'text-neutral-500'}`}>Academic Intelligence Suite</p>
           </div>
         </div>
-        <div className="p-3 rounded-2xl border border-emerald-800/80 bg-emerald-900/40 backdrop-blur-xl shadow-sm text-emerald-400 font-semibold text-xs flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Emerald Edition
-        </div>
+        <button
+          onClick={() => setDark(!dark)}
+          className={`p-3 rounded-2xl border ${dark ? 'border-neutral-800 bg-neutral-900 text-neutral-200' : 'border-neutral-200 bg-white text-neutral-700'} shadow-sm hover:scale-105 transition-all`}
+        >
+          {dark ? <Sun size={18} /> : <Moon size={18} />}
+        </button>
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-10 relative z-10">
-        {page === 1 && <Onboarding user={user} setUser={setUser} ok={onboardOk} submit={submitUser} />}
-        {page === 2 && <Marks user={user} marks={marks} setMarks={setMarks} ok={marksOk} back={() => setPage(1)} submit={predict} loading={loading} loadingStep={loadingStep} />}
-        {page === 3 && result && <Dashboard user={user} result={result} marks={marks} history={history} back={() => setPage(2)} />}
+        {page === 1 && <Onboarding user={user} setUser={setUser} ok={onboardOk} submit={submitUser} dark={dark} />}
+        {page === 2 && <Marks user={user} marks={marks} setMarks={setMarks} ok={marksOk} back={() => setPage(1)} submit={predict} loading={loading} loadingStep={loadingStep} dark={dark} />}
+        {page === 3 && result && <Dashboard user={user} result={result} marks={marks} history={history} back={() => setPage(2)} dark={dark} />}
       </main>
     </div>
   );
 }
 
-function Onboarding({user, setUser, ok, submit}) {
+function Onboarding({user, setUser, ok, submit, dark}) {
   return (
-    <section className="max-w-xl mx-auto bg-emerald-900/40 backdrop-blur-2xl border border-emerald-800/60 rounded-3xl p-8 shadow-2xl space-y-6">
+    <section className={`max-w-xl mx-auto ${dark ? 'bg-neutral-900/80 border-neutral-800' : 'bg-white/80 border-neutral-200'} backdrop-blur-xl border rounded-3xl p-8 shadow-xl space-y-6`}>
       <div className="space-y-2 text-center">
-        <div className="inline-flex p-3 bg-emerald-500/10 text-emerald-400 rounded-2xl mb-2 border border-emerald-500/20">
+        <div className={`inline-flex p-3 ${dark ? 'bg-neutral-800 text-white' : 'bg-neutral-100 text-black'} rounded-2xl mb-2`}>
           <Sparkles size={24} />
         </div>
-        <h2 className="text-3xl font-black tracking-tight text-white">Welcome Student</h2>
-        <p className="text-sm text-emerald-300/70">Enter your credentials to launch AI analytics.</p>
+        <h2 className="text-3xl font-black tracking-tight">Welcome Student</h2>
+        <p className={`text-sm ${dark ? 'text-neutral-400' : 'text-neutral-500'}`}>Enter your credentials to launch AI analytics.</p>
       </div>
 
       <div className="space-y-4">
         <div>
-          <label className="block text-xs font-bold uppercase tracking-wider text-emerald-400/80 mb-2">Full Name</label>
+          <label className={`block text-xs font-bold uppercase tracking-wider ${dark ? 'text-neutral-400' : 'text-neutral-600'} mb-2`}>Full Name</label>
           <div className="relative">
-            <UserRound className="absolute left-4 top-3.5 text-emerald-500/60" size={18} />
+            <UserRound className={`absolute left-4 top-3.5 ${dark ? 'text-neutral-500' : 'text-neutral-400'}`} size={18} />
             <input
               type="text"
               placeholder="Mridul"
               value={user?.name || ''}
               onChange={e => setUser({...user, name: e.target.value})}
-              className="w-full pl-11 pr-4 py-3.5 rounded-2xl border border-emerald-800/80 bg-emerald-950/50 text-white placeholder-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium"
+              className={`w-full pl-11 pr-4 py-3.5 rounded-2xl border ${dark ? 'border-neutral-800 bg-neutral-950 text-white placeholder-neutral-700' : 'border-neutral-200 bg-neutral-50 text-black placeholder-neutral-400'} focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all font-medium`}
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-xs font-bold uppercase tracking-wider text-emerald-400/80 mb-2">Email Address</label>
+          <label className={`block text-xs font-bold uppercase tracking-wider ${dark ? 'text-neutral-400' : 'text-neutral-600'} mb-2`}>Email Address</label>
           <div className="relative">
-            <Mail className="absolute left-4 top-3.5 text-emerald-500/60" size={18} />
+            <Mail className={`absolute left-4 top-3.5 ${dark ? 'text-neutral-500' : 'text-neutral-400'}`} size={18} />
             <input
               type="email"
               placeholder="student@college.edu"
               value={user?.email || ''}
               onChange={e => setUser({...user, email: e.target.value})}
-              className="w-full pl-11 pr-4 py-3.5 rounded-2xl border border-emerald-800/80 bg-emerald-950/50 text-white placeholder-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium"
+              className={`w-full pl-11 pr-4 py-3.5 rounded-2xl border ${dark ? 'border-neutral-800 bg-neutral-950 text-white placeholder-neutral-700' : 'border-neutral-200 bg-neutral-50 text-black placeholder-neutral-400'} focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all font-medium`}
             />
           </div>
         </div>
@@ -151,7 +148,7 @@ function Onboarding({user, setUser, ok, submit}) {
       <button
         disabled={!ok}
         onClick={submit}
-        className="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 disabled:opacity-50 text-white font-bold flex items-center justify-center gap-2 shadow-xl shadow-emerald-900/50 transition-all hover:scale-[1.02] active:scale-[0.98]"
+        className={`w-full py-4 rounded-2xl ${dark ? 'bg-white text-black hover:bg-neutral-200' : 'bg-black text-white hover:bg-neutral-800'} disabled:opacity-50 font-bold flex items-center justify-center gap-2 shadow-lg transition-all hover:scale-[1.01] active:scale-[0.99]`}
       >
         Continue <ArrowRight size={18} />
       </button>
@@ -159,7 +156,7 @@ function Onboarding({user, setUser, ok, submit}) {
   );
 }
 
-function Marks({user, marks, setMarks, ok, back, submit, loading, loadingStep}) {
+function Marks({user, marks, setMarks, ok, back, submit, loading, loadingStep, dark}) {
   const steps = [
     'Initializing tensor models...',
     'Running Scikit-Learn polynomial regression...',
@@ -169,37 +166,37 @@ function Marks({user, marks, setMarks, ok, back, submit, loading, loadingStep}) 
   return (
     <section className="max-w-3xl mx-auto space-y-8">
       {loading ? (
-        <div className="bg-emerald-900/40 backdrop-blur-2xl border border-emerald-800/60 rounded-3xl p-12 text-center space-y-6 shadow-2xl">
+        <div className={`${dark ? 'bg-neutral-900 border-neutral-800' : 'bg-white border-neutral-200'} border rounded-3xl p-12 text-center space-y-6 shadow-xl`}>
           <div className="relative w-20 h-20 mx-auto">
-            <div className="absolute inset-0 border-4 border-emerald-600/20 rounded-full"></div>
-            <div className="absolute inset-0 border-4 border-emerald-400 border-t-transparent rounded-full animate-spin"></div>
+            <div className={`absolute inset-0 border-4 ${dark ? 'border-neutral-800' : 'border-neutral-200'} rounded-full`}></div>
+            <div className={`absolute inset-0 border-4 ${dark ? 'border-white' : 'border-black'} border-t-transparent rounded-full animate-spin`}></div>
           </div>
           <div className="space-y-2">
-            <h3 className="text-xl font-bold text-white">AI Engine Active</h3>
-            <p className="text-sm text-emerald-300 font-medium animate-pulse">
+            <h3 className="text-xl font-bold">AI Engine Active</h3>
+            <p className={`text-sm ${dark ? 'text-neutral-400' : 'text-neutral-500'} font-medium animate-pulse`}>
               {steps[loadingStep - 1] || steps[0]}
             </p>
           </div>
-          <div className="w-full bg-emerald-950 h-2 rounded-full overflow-hidden max-w-sm mx-auto">
-            <div className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full transition-all duration-500" style={{ width: `${(loadingStep / 3) * 100}%` }}></div>
+          <div className={`w-full ${dark ? 'bg-neutral-800' : 'bg-neutral-100'} h-2 rounded-full overflow-hidden max-w-sm mx-auto`}>
+            <div className={`${dark ? 'bg-white' : 'bg-black'} h-full transition-all duration-500`} style={{ width: `${(loadingStep / 3) * 100}%` }}></div>
           </div>
         </div>
       ) : (
         <>
           <div className="flex justify-between items-center">
             <div>
-              <h2 className="text-2xl font-black tracking-tight text-white">Academic Assessment Scores</h2>
-              <p className="text-sm text-emerald-300/70 font-medium">Logged in as <span className="text-emerald-400 font-bold">{user?.name}</span></p>
+              <h2 className="text-2xl font-black tracking-tight">Academic Assessment Scores</h2>
+              <p className={`text-sm ${dark ? 'text-neutral-400' : 'text-neutral-600'} font-medium`}>Logged in as <span className="font-bold">{user?.name}</span></p>
             </div>
-            <button onClick={back} className="px-4 py-2.5 rounded-xl border border-emerald-800/80 bg-emerald-900/40 text-sm font-semibold flex items-center gap-2 hover:bg-emerald-800/50 transition-all text-emerald-200">
+            <button onClick={back} className={`px-4 py-2.5 rounded-xl border ${dark ? 'border-neutral-800 bg-neutral-900 text-neutral-200 hover:bg-neutral-800' : 'border-neutral-200 bg-white text-neutral-800 hover:bg-neutral-50'} text-sm font-semibold flex items-center gap-2 transition-all`}>
               <ArrowLeft size={16} /> Back
             </button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {Object.entries(MAX).map(([k, m]) => (
-              <div key={k} className="bg-emerald-900/40 backdrop-blur-2xl border border-emerald-800/60 p-6 rounded-3xl space-y-3 shadow-xl hover:border-emerald-600 transition-all">
-                <div className="flex justify-between text-xs font-bold uppercase tracking-wider text-emerald-400/80">
+              <div key={k} className={`${dark ? 'bg-neutral-900 border-neutral-800' : 'bg-white border-neutral-200'} border p-6 rounded-3xl space-y-3 shadow-sm hover:border-neutral-400 transition-all`}>
+                <div className={`flex justify-between text-xs font-bold uppercase tracking-wider ${dark ? 'text-neutral-400' : 'text-neutral-500'}`}>
                   <span>{k.toUpperCase()} Marks</span>
                   <span>Max: {m}</span>
                 </div>
@@ -209,17 +206,17 @@ function Marks({user, marks, setMarks, ok, back, submit, loading, loadingStep}) 
                   max={m}
                   value={marks[k]}
                   onChange={e => setMarks({...marks, [k]: e.target.value})}
-                  className="w-full text-3xl font-black bg-transparent border-b border-emerald-800 text-white py-1 focus:outline-none focus:border-emerald-400 transition-colors"
+                  className={`w-full text-3xl font-black bg-transparent border-b ${dark ? 'border-neutral-800 text-white focus:border-white' : 'border-neutral-200 text-black focus:border-black'} py-1 focus:outline-none transition-colors`}
                   placeholder="0"
                 />
               </div>
             ))}
           </div>
 
-          <div className="bg-emerald-900/40 backdrop-blur-2xl border border-emerald-800/60 p-6 rounded-3xl space-y-4 shadow-xl">
+          <div className={`${dark ? 'bg-neutral-900 border-neutral-800' : 'bg-white border-neutral-200'} border p-6 rounded-3xl space-y-4 shadow-sm`}>
             <div className="flex justify-between items-center">
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-400/80">Attendance Percentage</span>
-              <span className="text-2xl font-black text-emerald-400">{marks.attendance}%</span>
+              <span className={`text-xs font-bold uppercase tracking-wider ${dark ? 'text-neutral-400' : 'text-neutral-500'}`}>Attendance Percentage</span>
+              <span className="text-2xl font-black">{marks.attendance}%</span>
             </div>
             <input
               type="range"
@@ -227,14 +224,14 @@ function Marks({user, marks, setMarks, ok, back, submit, loading, loadingStep}) 
               max="100"
               value={marks.attendance}
               onChange={e => setMarks({...marks, attendance: e.target.value})}
-              className="w-full accent-emerald-500 cursor-pointer"
+              className={`w-full ${dark ? 'accent-white' : 'accent-black'} cursor-pointer`}
             />
           </div>
 
           <button
             disabled={!ok}
             onClick={submit}
-            className="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 disabled:opacity-50 text-white font-bold flex items-center justify-center gap-2 shadow-xl shadow-emerald-900/50 transition-all hover:scale-[1.01] active:scale-[0.99]"
+            className={`w-full py-4 rounded-2xl ${dark ? 'bg-white text-black hover:bg-neutral-200' : 'bg-black text-white hover:bg-neutral-800'} disabled:opacity-50 font-bold flex items-center justify-center gap-2 shadow-lg transition-all hover:scale-[1.01] active:scale-[0.99]`}
           >
             Generate Prediction <Rocket size={18} />
           </button>
@@ -244,7 +241,7 @@ function Marks({user, marks, setMarks, ok, back, submit, loading, loadingStep}) 
   );
 }
 
-function Dashboard({user, result, marks, history, back}) {
+function Dashboard({user, result, marks, history, back, dark}) {
   const rawData = result?.prediction || result || {};
   const basePercentageVal = rawData.predicted_percentage ?? rawData.percentage ?? 75.81;
   
@@ -288,61 +285,59 @@ function Dashboard({user, result, marks, history, back}) {
     <section className="max-w-6xl mx-auto space-y-8 pb-12">
       <div className="flex justify-between items-center print:hidden">
         <div>
-          <span className="text-xs font-extrabold uppercase tracking-widest text-emerald-400">Analytics Suite</span>
-          <h2 className="text-3xl font-black tracking-tight mt-1 text-white">{user?.name || 'Student'}'s Academic Outlook</h2>
-          <p className="text-sm text-emerald-300/70 font-medium mt-1">Regression-backed projection and diagnostic metrics.</p>
+          <span className={`text-xs font-extrabold uppercase tracking-widest ${dark ? 'text-neutral-400' : 'text-neutral-500'}`}>Analytics Suite</span>
+          <h2 className="text-3xl font-black tracking-tight mt-1">{user?.name || 'Student'}'s Academic Outlook</h2>
+          <p className={`text-sm ${dark ? 'text-neutral-400' : 'text-neutral-600'} font-medium mt-1`}>Regression-backed projection and diagnostic metrics.</p>
         </div>
         <div className="flex items-center gap-3">
-          <button onClick={exportPDF} className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 text-white text-sm font-bold flex items-center gap-2 shadow-lg shadow-emerald-900/50 hover:scale-105 transition-all">
+          <button onClick={exportPDF} className={`px-4 py-2.5 rounded-xl ${dark ? 'bg-white text-black hover:bg-neutral-200' : 'bg-black text-white hover:bg-neutral-800'} text-sm font-bold flex items-center gap-2 shadow-md transition-all`}>
             <Download size={16} /> Export Report
           </button>
-          <button onClick={back} className="px-4 py-2.5 rounded-xl border border-emerald-800/80 bg-emerald-900/40 text-sm font-semibold flex items-center gap-2 hover:bg-emerald-800/50 transition-all text-emerald-200">
+          <button onClick={back} className={`px-4 py-2.5 rounded-xl border ${dark ? 'border-neutral-800 bg-neutral-900 text-neutral-200 hover:bg-neutral-800' : 'border-neutral-200 bg-white text-neutral-800 hover:bg-neutral-50'} text-sm font-semibold flex items-center gap-2 transition-all`}>
             <ArrowLeft size={16} /> Edit Inputs
           </button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-emerald-900/40 backdrop-blur-2xl border border-emerald-800/60 p-8 rounded-3xl flex flex-col justify-between space-y-6 shadow-2xl">
+        <div className={`lg:col-span-2 ${dark ? 'bg-neutral-900 border-neutral-800' : 'bg-white border-neutral-200'} border p-8 rounded-3xl flex flex-col justify-between space-y-6 shadow-sm`}>
           <div className="flex justify-between items-start">
             <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-400/80">Predicted Final Percentage</span>
-              <div className="text-6xl font-black bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent mt-2">
-                {percentage}%
-              </div>
-              <div className="inline-block mt-3 px-3.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-bold border border-emerald-500/20">
+              <span className={`text-xs font-bold uppercase tracking-wider ${dark ? 'text-neutral-400' : 'text-neutral-500'}`}>Predicted Final Percentage</span>
+              <div className="text-6xl font-black tracking-tight mt-2">{percentage}%</div>
+              <div className={`inline-block mt-3 px-3.5 py-1 rounded-full ${dark ? 'bg-neutral-800 text-neutral-200 border-neutral-700' : 'bg-neutral-100 text-neutral-800 border-neutral-200'} border text-xs font-bold`}>
                 {label}
               </div>
             </div>
             <div className="relative w-28 h-28 flex items-center justify-center">
               <svg className="w-full h-full transform -rotate-90">
-                <circle cx="56" cy="56" r="46" stroke="currentColor" strokeWidth="10" className="text-emerald-950 fill-none" />
-                <circle cx="56" cy="56" r="46" stroke="currentColor" strokeWidth="10" strokeDasharray="289" strokeDashoffset={289 - (289 * parseFloat(percentage)) / 100} className="text-emerald-400 fill-none transition-all duration-1000" />
+                <circle cx="56" cy="56" r="46" stroke="currentColor" strokeWidth="10" className={`${dark ? 'text-neutral-800' : 'text-neutral-100'} fill-none`} />
+                <circle cx="56" cy="56" r="46" stroke="currentColor" strokeWidth="10" strokeDasharray="289" strokeDashoffset={289 - (289 * parseFloat(percentage)) / 100} className={`${dark ? 'text-white' : 'text-black'} fill-none transition-all duration-1000`} />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                <span className="text-xl font-black text-white">{Math.round(parseFloat(percentage))}</span>
-                <span className="text-[10px] text-emerald-400/70 font-bold uppercase">Score</span>
+                <span className="text-xl font-black">{Math.round(parseFloat(percentage))}</span>
+                <span className={`text-[10px] ${dark ? 'text-neutral-400' : 'text-neutral-500'} font-bold uppercase`}>Score</span>
               </div>
             </div>
           </div>
-          <p className="text-xs text-emerald-300/80 leading-relaxed border-t border-emerald-800/60 pt-4 font-medium">
+          <p className={`text-xs ${dark ? 'text-neutral-400' : 'text-neutral-600'} leading-relaxed border-t ${dark ? 'border-neutral-800' : 'border-neutral-100'} pt-4 font-medium`}>
             Model synthesizes continuous assessment scores with active attendance matrices to generate predictive targets.
           </p>
         </div>
 
-        <div className="bg-emerald-900/40 backdrop-blur-2xl border border-emerald-800/60 p-8 rounded-3xl flex flex-col justify-between space-y-4 shadow-2xl">
+        <div className={`${dark ? 'bg-neutral-900 border-neutral-800' : 'bg-white border-neutral-200'} border p-8 rounded-3xl flex flex-col justify-between space-y-4 shadow-sm`}>
           <div>
-            <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs uppercase tracking-wider mb-4">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> Snapshot Metrics
+            <div className={`flex items-center gap-2 font-bold text-xs uppercase tracking-wider mb-4 ${dark ? 'text-neutral-300' : 'text-neutral-700'}`}>
+              <span className={`w-2 h-2 rounded-full ${dark ? 'bg-white' : 'bg-black'} animate-ping`}></span> Snapshot Metrics
             </div>
             <div className="space-y-4">
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400/80">Attendance Index</span>
-                <div className="text-2xl font-black mt-0.5 text-white">{marks?.attendance}%</div>
+                <span className={`text-[10px] font-bold uppercase tracking-wider ${dark ? 'text-neutral-400' : 'text-neutral-500'}`}>Attendance Index</span>
+                <div className="text-2xl font-black mt-0.5">{marks?.attendance}%</div>
               </div>
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400/80">Evaluation Mode</span>
-                <div className="text-lg font-bold text-emerald-300 mt-0.5">Scikit Regression</div>
+                <span className={`text-[10px] font-bold uppercase tracking-wider ${dark ? 'text-neutral-400' : 'text-neutral-500'}`}>Evaluation Mode</span>
+                <div className="text-lg font-bold mt-0.5">Scikit Regression</div>
               </div>
             </div>
           </div>
@@ -350,28 +345,28 @@ function Dashboard({user, result, marks, history, back}) {
       </div>
 
       {/* What-If Simulator */}
-      <div className="bg-emerald-900/40 backdrop-blur-2xl border-2 border-emerald-500/30 p-8 rounded-3xl space-y-6 shadow-2xl">
+      <div className={`${dark ? 'bg-neutral-900 border-neutral-700' : 'bg-white border-neutral-300'} border-2 p-8 rounded-3xl space-y-6 shadow-sm`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-gradient-to-tr from-emerald-600 to-teal-500 text-white rounded-2xl shadow-lg">
+            <div className={`p-3 ${dark ? 'bg-white text-black' : 'bg-black text-white'} rounded-2xl shadow-md`}>
               <Sliders size={20} />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-white">What-If Scenario Simulator</h3>
-              <p className="text-xs text-emerald-300/70">Dynamically adjust parameters to evaluate potential performance changes</p>
+              <h3 className="text-lg font-bold">What-If Scenario Simulator</h3>
+              <p className={`text-xs ${dark ? 'text-neutral-400' : 'text-neutral-500'}`}>Dynamically adjust parameters to evaluate potential performance changes</p>
             </div>
           </div>
           <div className="text-right">
-            <span className="text-xs text-emerald-400/80 block uppercase font-bold">Simulated Projection</span>
-            <span className="text-2xl font-black text-emerald-400">{simulatedPercentage}%</span>
+            <span className={`text-xs ${dark ? 'text-neutral-400' : 'text-neutral-500'} block uppercase font-bold`}>Simulated Projection</span>
+            <span className="text-2xl font-black">{simulatedPercentage}%</span>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
           <div className="space-y-2">
             <div className="flex justify-between text-xs font-bold">
-              <span className="text-emerald-300/80">Simulated Attendance</span>
-              <span className="text-emerald-400 font-black">{simAttendance}%</span>
+              <span className={dark ? 'text-neutral-400' : 'text-neutral-600'}>Simulated Attendance</span>
+              <span className="font-black">{simAttendance}%</span>
             </div>
             <input
               type="range"
@@ -379,14 +374,14 @@ function Dashboard({user, result, marks, history, back}) {
               max="100"
               value={simAttendance}
               onChange={e => setSimAttendance(Number(e.target.value))}
-              className="w-full accent-emerald-500 cursor-pointer"
+              className={`w-full ${dark ? 'accent-white' : 'accent-black'} cursor-pointer`}
             />
           </div>
 
           <div className="space-y-2">
             <div className="flex justify-between text-xs font-bold">
-              <span className="text-emerald-300/80">Extra Score Boost</span>
-              <span className="text-emerald-400 font-black">+{simBonusMarks} marks</span>
+              <span className={dark ? 'text-neutral-400' : 'text-neutral-600'}>Extra Score Boost</span>
+              <span className="font-black">+{simBonusMarks} marks</span>
             </div>
             <input
               type="range"
@@ -394,32 +389,32 @@ function Dashboard({user, result, marks, history, back}) {
               max="100"
               value={simBonusMarks}
               onChange={e => setSimBonusMarks(Number(e.target.value))}
-              className="w-full accent-emerald-500 cursor-pointer"
+              className={`w-full ${dark ? 'accent-white' : 'accent-black'} cursor-pointer`}
             />
           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-emerald-900/40 backdrop-blur-2xl border border-emerald-800/60 p-8 rounded-3xl space-y-4 shadow-2xl">
-          <h3 className="text-lg font-bold text-white">Assessment Breakdown</h3>
+        <div className={`${dark ? 'bg-neutral-900 border-neutral-800' : 'bg-white border-neutral-200'} border p-8 rounded-3xl space-y-4 shadow-sm`}>
+          <h3 className="text-lg font-bold">Assessment Breakdown</h3>
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={barData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#065f4633" />
-                <XAxis dataKey="name" stroke="#34d399" fontSize={12} tickLine={false} />
-                <YAxis stroke="#34d399" fontSize={12} tickLine={false} />
-                <Tooltip contentStyle={{ background: '#022c22', border: '1px solid #065f46', borderRadius: '16px', color: '#fff', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.5)' }} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={dark ? '#262626' : '#e5e5e5'} />
+                <XAxis dataKey="name" stroke={dark ? '#a3a3a3' : '#737373'} fontSize={12} tickLine={false} />
+                <YAxis stroke={dark ? '#a3a3a3' : '#737373'} fontSize={12} tickLine={false} />
+                <Tooltip contentStyle={{ background: dark ? '#171717' : '#ffffff', border: dark ? '1px solid #404040' : '1px solid #d4d4d4', borderRadius: '16px', color: dark ? '#fff' : '#000' }} />
                 <Legend wrapperStyle={{ fontSize: '12px' }} />
-                <Bar dataKey="max" name="max" fill="#065f46" radius={[8, 8, 0, 0]} />
-                <Bar dataKey="obtained" name="obtained" fill="#34d399" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="max" name="max" fill={dark ? '#404040' : '#d4d4d4'} radius={[8, 8, 0, 0]} />
+                <Bar dataKey="obtained" name="obtained" fill={dark ? '#ffffff' : '#000000'} radius={[8, 8, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        <div className="bg-emerald-900/40 backdrop-blur-2xl border border-emerald-800/60 p-8 rounded-3xl space-y-4 shadow-2xl flex flex-col items-center">
-          <h3 className="text-lg font-bold self-start text-white">Performance Radar</h3>
+        <div className={`${dark ? 'bg-neutral-900 border-neutral-800' : 'bg-white border-neutral-200'} border p-8 rounded-3xl space-y-4 shadow-sm flex flex-col items-center`}>
+          <h3 className="text-lg font-bold self-start">Performance Radar</h3>
           <div className="h-64 w-full flex items-center justify-center">
             <ResponsiveContainer width="100%" height="100%">
               <RadarChart cx="50%" cy="50%" outerRadius="80%" data={[
@@ -428,9 +423,9 @@ function Dashboard({user, result, marks, history, back}) {
                 { subject: 'CAE', A: 65, fullMark: 100 },
                 { subject: 'PUT', A: 90, fullMark: 100 },
               ]}>
-                <PolarGrid stroke="#065f4655" />
-                <PolarAngleAxis dataKey="subject" tick={{ fill: '#34d399', fontSize: 12 }} />
-                <Radar name="Student" dataKey="A" stroke="#34d399" fill="#34d399" fillOpacity={0.4} />
+                <PolarGrid stroke={dark ? '#262626' : '#e5e5e5'} />
+                <PolarAngleAxis dataKey="subject" tick={{ fill: dark ? '#a3a3a3' : '#737373', fontSize: 12 }} />
+                <Radar name="Student" dataKey="A" stroke={dark ? '#ffffff' : '#000000'} fill={dark ? '#ffffff' : '#000000'} fillOpacity={0.2} />
               </RadarChart>
             </ResponsiveContainer>
           </div>
@@ -438,17 +433,17 @@ function Dashboard({user, result, marks, history, back}) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-emerald-900/40 backdrop-blur-2xl border border-emerald-800/60 p-8 rounded-3xl space-y-6 shadow-2xl">
-          <h3 className="text-lg font-bold text-white">Feature Importance</h3>
+        <div className={`${dark ? 'bg-neutral-900 border-neutral-800' : 'bg-white border-neutral-200'} border p-8 rounded-3xl space-y-6 shadow-sm`}>
+          <h3 className="text-lg font-bold">Feature Importance</h3>
           <div className="space-y-4">
             {features.map((feat, i) => (
               <div key={i} className="space-y-1.5">
                 <div className="flex justify-between text-xs font-bold">
-                  <span className="text-emerald-200">{feat.name}</span>
-                  <span className="text-emerald-400">{feat.val}%</span>
+                  <span className={dark ? 'text-neutral-300' : 'text-neutral-700'}>{feat.name}</span>
+                  <span>{feat.val}%</span>
                 </div>
-                <div className="w-full h-2.5 bg-emerald-950 rounded-full overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full" style={{ width: `${feat.val * 2}%` }}></div>
+                <div className={`w-full h-2.5 ${dark ? 'bg-neutral-950 border-neutral-800' : 'bg-neutral-100 border-neutral-200'} border rounded-full overflow-hidden`}>
+                  <div className={`h-full ${dark ? 'bg-white' : 'bg-black'} rounded-full`} style={{ width: `${feat.val * 2}%` }}></div>
                 </div>
               </div>
             ))}
@@ -456,38 +451,38 @@ function Dashboard({user, result, marks, history, back}) {
         </div>
 
         {/* History Tracker */}
-        <div className="bg-emerald-900/40 backdrop-blur-2xl border border-emerald-800/60 p-8 rounded-3xl space-y-6 shadow-2xl">
+        <div className={`${dark ? 'bg-neutral-900 border-neutral-800' : 'bg-white border-neutral-200'} border p-8 rounded-3xl space-y-6 shadow-sm`}>
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-bold flex items-center gap-2 text-white">
-              <History size={18} className="text-emerald-400" /> Prediction History
+            <h3 className="text-lg font-bold flex items-center gap-2">
+              <History size={18} /> Prediction History
             </h3>
-            <span className="text-xs text-emerald-400/70 font-medium">Recent 5 logs</span>
+            <span className={`text-xs ${dark ? 'text-neutral-400' : 'text-neutral-500'} font-medium`}>Recent 5 logs</span>
           </div>
           <div className="space-y-3">
             {history && history.length > 0 ? (
               history.map((item, idx) => (
-                <div key={idx} className="flex items-center justify-between p-3.5 rounded-2xl bg-emerald-950/40 border border-emerald-800/50 text-xs">
-                  <span className="font-semibold text-emerald-300">{item.date}</span>
+                <div key={idx} className={`flex items-center justify-between p-3.5 rounded-2xl ${dark ? 'bg-neutral-950 border-neutral-800' : 'bg-neutral-50 border-neutral-200'} border text-xs`}>
+                  <span className={`font-semibold ${dark ? 'text-neutral-300' : 'text-neutral-700'}`}>{item.date}</span>
                   <div className="flex items-center gap-4">
-                    <span>Attendance: <strong className="text-white">{item.attendance}%</strong></span>
-                    <span className="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 font-black border border-emerald-500/20">{item.percentage}%</span>
+                    <span>Attendance: <strong className={dark ? 'text-white' : 'text-black'}>{item.attendance}%</strong></span>
+                    <span className={`px-3 py-1 rounded-full ${dark ? 'bg-neutral-800 text-white border-neutral-700' : 'bg-neutral-200 text-black border-neutral-300'} font-black border`}>{item.percentage}%</span>
                   </div>
                 </div>
               ))
             ) : (
-              <p className="text-xs text-emerald-400/70 font-medium">No history recorded yet.</p>
+              <p className={`text-xs ${dark ? 'text-neutral-400' : 'text-neutral-500'} font-medium`}>No history recorded yet.</p>
             )}
           </div>
         </div>
       </div>
 
-      <div className="bg-emerald-900/40 backdrop-blur-2xl border border-emerald-800/60 p-8 rounded-3xl space-y-6 shadow-2xl">
-        <h3 className="text-lg font-bold text-white">Smart Recommendations</h3>
+      <div className={`${dark ? 'bg-neutral-900 border-neutral-800' : 'bg-white border-neutral-200'} border p-8 rounded-3xl space-y-6 shadow-sm`}>
+        <h3 className="text-lg font-bold">Smart Recommendations</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {recommendations.map((rec, i) => (
-            <div key={i} className="p-5 rounded-2xl bg-teal-500/10 border border-teal-500/20 flex items-start gap-3">
-              <span className="text-teal-400 text-lg mt-0.5">💡</span>
-              <p className="text-xs text-emerald-200 font-medium leading-relaxed">{rec}</p>
+            <div key={i} className={`p-5 rounded-2xl ${dark ? 'bg-neutral-950 border-neutral-800 text-neutral-300' : 'bg-neutral-50 border-neutral-200 text-neutral-700'} border flex items-start gap-3`}>
+              <span className="text-lg mt-0.5">💡</span>
+              <p className="text-xs font-medium leading-relaxed">{rec}</p>
             </div>
           ))}
         </div>
