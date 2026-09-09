@@ -5,7 +5,13 @@ import numpy as np
 from sklearn.linear_model import LinearRegression
 
 app = FastAPI(title='Student Performance Predictor API')
-app.add_middleware(CORSMiddleware, allow_origins=['http://localhost:5173'], allow_credentials=True, allow_methods=['*'], allow_headers=['*'])
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Demo model: trained on synthetic academic patterns. Replace with institutional historical data for production.
 rng = np.random.default_rng(42)
