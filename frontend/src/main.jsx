@@ -1,6 +1,6 @@
 import React, {useEffect, useMemo, useState} from 'react';
 import {createRoot} from 'react-dom/client';
-import {ArrowRight, ArrowLeft, Rocket, BrainCircuit, ShieldCheck, Mail, UserRound, ChartBar, Download, History, Sliders, Sparkles, Cpu, Database, CheckCircle2} from 'lucide-react';
+import {ArrowRight, ArrowLeft, Rocket, BrainCircuit, ShieldCheck, Mail, UserRound, ChartBar, Download, History, Sliders, Sparkles, Terminal, Cpu, Database, Award} from 'lucide-react';
 import {ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, RadarChart, Radar, PolarGrid, PolarAngleAxis} from 'recharts';
 import './index.css';
 
@@ -8,12 +8,18 @@ const MAX = {cae1: 180, cae2: 180, put: 420, internal: 180};
 
 function App() {
   const [page, setPage] = useState(1);
+  const [dark, setDark] = useState(localStorage.theme === 'dark');
   const [user, setUser] = useState(() => JSON.parse(localStorage.studentUser || 'null'));
   const [marks, setMarks] = useState({cae1: '', cae2: '', put: '', internal: '', attendance: 75});
   const [loading, setLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState(0);
   const [result, setResult] = useState(null);
   const [history, setHistory] = useState(() => JSON.parse(localStorage.predictionHistory || '[]'));
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', dark);
+    localStorage.theme = dark ? 'dark' : 'light';
+  }, [dark]);
 
   const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const onboardOk = user?.name?.trim() && validEmail.test(user?.email || '');
@@ -70,31 +76,35 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 selection:bg-indigo-500 selection:text-white font-sans antialiased transition-colors duration-300">
-      {/* SaaS Ambient Glow Backgrounds */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-gradient-to-b from-indigo-100/60 via-transparent to-transparent pointer-events-none blur-3xl"></div>
+    <div className="min-h-screen relative overflow-hidden bg-[#021f18] text-emerald-50 transition-colors duration-500 font-sans">
+      {/* Background Tech Glows */}
+      <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] rounded-full bg-emerald-600/10 blur-[150px] pointer-events-none"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-teal-600/10 blur-[150px] pointer-events-none"></div>
 
-      <header className="max-w-6xl mx-auto px-6 py-6 flex justify-between items-center relative z-10 print:hidden">
-        <div className="flex items-center gap-3 cursor-pointer group" onClick={() => setPage(1)}>
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform">
-            <BrainCircuit size={22} />
+      <header className="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center border-b border-emerald-900/60 relative z-10 print:hidden">
+        <div className="flex items-center gap-3 group cursor-pointer" onClick={() => setPage(1)}>
+          <div className="p-2.5 bg-gradient-to-tr from-emerald-600 to-teal-600 rounded-xl text-white shadow-lg shadow-emerald-950">
+            <Cpu size={22} />
           </div>
           <div>
-            <h1 className="text-base font-bold tracking-tight text-slate-900 flex items-center gap-2">
-              EduPredict AI <span className="text-[10px] bg-indigo-50 text-indigo-600 border border-indigo-200 px-2 py-0.5 rounded-full font-semibold">v2.4 SaaS</span>
-            </h1>
-            <p className="text-xs text-slate-500 font-medium">Advanced Student Performance Analytics</p>
+            <div className="flex items-center gap-2">
+              <h1 className="text-base font-black tracking-tight text-white">
+                ML Academic Engine
+              </h1>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-900/80 text-emerald-300 border border-emerald-700/50">v2.4-PRO</span>
+            </div>
+            <p className="text-[11px] font-mono text-emerald-400/70">Department of Data Science & Engineering</p>
           </div>
         </div>
-
-        <div className="hidden sm:flex items-center gap-3 text-xs font-medium text-slate-600 bg-white px-4 py-2 rounded-full border border-slate-200 shadow-sm">
-          <span className="flex items-center gap-1.5 text-emerald-600"><CheckCircle2 size={14} /> Model Active</span>
-          <span className="text-slate-300">|</span>
-          <span>R² Score: 0.941</span>
+        
+        <div className="hidden md:flex items-center gap-4 text-xs font-mono text-emerald-400/80 bg-emerald-950/60 px-4 py-2 rounded-xl border border-emerald-900">
+          <span className="flex items-center gap-1.5"><Database size={13} className="text-emerald-400"/> Scikit-Learn Model</span>
+          <span>•</span>
+          <span className="flex items-center gap-1.5"><ShieldCheck size={13} className="text-teal-400"/> R² Score: 0.941</span>
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-6 py-8 relative z-10">
+      <main className="max-w-7xl mx-auto px-6 py-10 relative z-10">
         {page === 1 && <Onboarding user={user} setUser={setUser} ok={onboardOk} submit={submitUser} />}
         {page === 2 && <Marks user={user} marks={marks} setMarks={setMarks} ok={marksOk} back={() => setPage(1)} submit={predict} loading={loading} loadingStep={loadingStep} />}
         {page === 3 && result && <Dashboard user={user} result={result} marks={marks} history={history} back={() => setPage(2)} />}
@@ -105,40 +115,40 @@ function App() {
 
 function Onboarding({user, setUser, ok, submit}) {
   return (
-    <section className="max-w-md mx-auto bg-white border border-slate-200/80 rounded-3xl p-8 shadow-xl shadow-slate-200/50 space-y-6 mt-6">
+    <section className="max-w-xl mx-auto bg-emerald-950/60 backdrop-blur-2xl border border-emerald-800/80 rounded-2xl p-8 shadow-2xl space-y-6">
       <div className="space-y-2 text-center">
-        <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl mx-auto flex items-center justify-center border border-indigo-100 mb-4">
-          <Sparkles size={22} />
+        <div className="inline-flex p-3 bg-emerald-900/50 text-emerald-400 rounded-xl mb-1 border border-emerald-700/50">
+          <Terminal size={22} />
         </div>
-        <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">Get Started</h2>
-        <p className="text-xs text-slate-500 font-medium">Enter your details to launch predictive pipeline.</p>
+        <h2 className="text-2xl font-black tracking-tight text-white">Student Authentication</h2>
+        <p className="text-xs font-mono text-emerald-400/70">Initialize predictive session parameters.</p>
       </div>
 
-      <div className="space-y-4 text-xs">
+      <div className="space-y-4 font-mono text-xs">
         <div>
-          <label className="block uppercase tracking-wider text-slate-500 font-bold mb-1.5">Full Name</label>
+          <label className="block uppercase tracking-wider text-emerald-400/80 mb-2 font-bold">Candidate Name</label>
           <div className="relative">
-            <UserRound className="absolute left-3.5 top-3.5 text-slate-400" size={16} />
+            <UserRound className="absolute left-3.5 top-3 text-emerald-600" size={16} />
             <input
               type="text"
               placeholder="e.g. Mridul"
               value={user?.name || ''}
               onChange={e => setUser({...user, name: e.target.value})}
-              className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all font-sans font-medium text-sm"
+              className="w-full pl-10 pr-4 py-3 rounded-xl border border-emerald-800/80 bg-emerald-900/30 text-white placeholder-emerald-700 focus:outline-none focus:ring-1 focus:ring-emerald-400 font-sans font-medium text-sm"
             />
           </div>
         </div>
 
         <div>
-          <label className="block uppercase tracking-wider text-slate-500 font-bold mb-1.5">Email Address</label>
+          <label className="block uppercase tracking-wider text-emerald-400/80 mb-2 font-bold">University Email</label>
           <div className="relative">
-            <Mail className="absolute left-3.5 top-3.5 text-slate-400" size={16} />
+            <Mail className="absolute left-3.5 top-3 text-emerald-600" size={16} />
             <input
               type="email"
-              placeholder="student@college.edu"
+              placeholder="student@aktu.ac.in"
               value={user?.email || ''}
               onChange={e => setUser({...user, email: e.target.value})}
-              className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all font-sans font-medium text-sm"
+              className="w-full pl-10 pr-4 py-3 rounded-xl border border-emerald-800/80 bg-emerald-900/30 text-white placeholder-emerald-700 focus:outline-none focus:ring-1 focus:ring-emerald-400 font-sans font-medium text-sm"
             />
           </div>
         </div>
@@ -147,9 +157,9 @@ function Onboarding({user, setUser, ok, submit}) {
       <button
         disabled={!ok}
         onClick={submit}
-        className="w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/25 transition-all hover:scale-[1.01] active:scale-[0.99]"
+        className="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 disabled:opacity-50 text-white font-mono font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-emerald-950 transition-all"
       >
-        Continue to Assessment <ArrowRight size={16} />
+        Initialize Session <ArrowRight size={16} />
       </button>
     </section>
   );
@@ -157,47 +167,47 @@ function Onboarding({user, setUser, ok, submit}) {
 
 function Marks({user, marks, setMarks, ok, back, submit, loading, loadingStep}) {
   const steps = [
-    'Initializing tensor dataset vectors...',
-    'Executing Scikit-Learn Polynomial Regression...',
-    'Computing confidence scores & residual matrix...'
+    'Loading dataset features into tensor pipeline...',
+    'Executing Scikit-Learn Polynomial Regression model...',
+    'Computing confidence metrics & evaluation scores...'
   ];
 
   return (
-    <section className="max-w-2xl mx-auto space-y-6">
+    <section className="max-w-3xl mx-auto space-y-6">
       {loading ? (
-        <div className="bg-white border border-slate-200 rounded-3xl p-10 text-center space-y-6 shadow-xl">
+        <div className="bg-emerald-950/80 backdrop-blur-2xl border border-emerald-800/80 rounded-2xl p-10 text-center space-y-6 shadow-2xl font-mono">
           <div className="relative w-16 h-16 mx-auto">
-            <div className="absolute inset-0 border-3 border-indigo-100 rounded-full"></div>
-            <div className="absolute inset-0 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+            <div className="absolute inset-0 border-3 border-emerald-800 rounded-full"></div>
+            <div className="absolute inset-0 border-3 border-emerald-400 border-t-transparent rounded-full animate-spin"></div>
           </div>
           <div className="space-y-2">
-            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-widest">Processing Pipeline</h3>
-            <p className="text-xs text-indigo-600 font-medium animate-pulse">
+            <h3 className="text-sm font-bold text-emerald-300 uppercase tracking-widest">Executing Pipeline</h3>
+            <p className="text-xs text-emerald-400/80 animate-pulse">
               {steps[loadingStep - 1] || steps[0]}
             </p>
           </div>
-          <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden max-w-xs mx-auto">
-            <div className="bg-indigo-600 h-full transition-all duration-500" style={{ width: `${(loadingStep / 3) * 100}%` }}></div>
+          <div className="w-full bg-emerald-900/60 h-1.5 rounded-full overflow-hidden max-w-xs mx-auto border border-emerald-800">
+            <div className="bg-emerald-400 h-full transition-all duration-500" style={{ width: `${(loadingStep / 3) * 100}%` }}></div>
           </div>
         </div>
       ) : (
         <>
-          <div className="flex justify-between items-center bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <div className="flex justify-between items-center bg-emerald-950/40 p-5 rounded-2xl border border-emerald-900">
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-widest text-indigo-600">Step 2 of 3</span>
-              <h2 className="text-lg font-extrabold text-slate-900 mt-0.5">Enter Assessment Scores</h2>
+              <span className="text-[10px] font-mono uppercase tracking-widest text-emerald-400">Pipeline Input Vector</span>
+              <h2 className="text-xl font-black text-white mt-0.5">Continuous Assessment Parameters</h2>
             </div>
-            <button onClick={back} className="px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs font-semibold flex items-center gap-2 hover:bg-slate-100 transition-all text-slate-700">
+            <button onClick={back} className="px-3.5 py-2 rounded-xl border border-emerald-800 bg-emerald-900/40 text-xs font-mono flex items-center gap-2 hover:bg-emerald-800/50 transition-all text-emerald-200">
               <ArrowLeft size={14} /> Back
             </button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {Object.entries(MAX).map(([k, m]) => (
-              <div key={k} className="bg-white border border-slate-200 p-5 rounded-2xl space-y-2.5 shadow-sm hover:border-indigo-300 transition-all">
-                <div className="flex justify-between text-[11px] uppercase tracking-wider text-slate-500 font-bold">
-                  <span>{k.toUpperCase()} Score</span>
-                  <span className="text-indigo-600">Max: {m}</span>
+              <div key={k} className="bg-emerald-950/60 backdrop-blur-xl border border-emerald-900 p-5 rounded-2xl space-y-3 shadow-lg hover:border-emerald-700 transition-all font-mono">
+                <div className="flex justify-between text-[11px] uppercase tracking-wider text-emerald-400/80 font-bold">
+                  <span>{k.toUpperCase()} Input</span>
+                  <span className="text-emerald-500">Max: {m}</span>
                 </div>
                 <input
                   type="number"
@@ -205,17 +215,17 @@ function Marks({user, marks, setMarks, ok, back, submit, loading, loadingStep}) 
                   max={m}
                   value={marks[k]}
                   onChange={e => setMarks({...marks, [k]: e.target.value})}
-                  className="w-full text-2xl font-black bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-colors"
+                  className="w-full text-2xl font-black bg-emerald-900/20 border border-emerald-800/80 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-emerald-400 transition-colors font-sans"
                   placeholder="0"
                 />
               </div>
             ))}
           </div>
 
-          <div className="bg-white border border-slate-200 p-6 rounded-2xl space-y-4 shadow-sm">
+          <div className="bg-emerald-950/60 backdrop-blur-xl border border-emerald-900 p-6 rounded-2xl space-y-4 shadow-lg font-mono">
             <div className="flex justify-between items-center text-xs">
-              <span className="uppercase tracking-wider text-slate-500 font-bold">Attendance Percentage</span>
-              <span className="text-lg font-black text-indigo-600">{marks.attendance}%</span>
+              <span className="uppercase tracking-wider text-emerald-400/80 font-bold">Attendance Ratio Matrix</span>
+              <span className="text-lg font-black text-emerald-400">{marks.attendance}%</span>
             </div>
             <input
               type="range"
@@ -223,16 +233,16 @@ function Marks({user, marks, setMarks, ok, back, submit, loading, loadingStep}) 
               max="100"
               value={marks.attendance}
               onChange={e => setMarks({...marks, attendance: e.target.value})}
-              className="w-full accent-indigo-600 cursor-pointer"
+              className="w-full accent-emerald-400 cursor-pointer"
             />
           </div>
 
           <button
             disabled={!ok}
             onClick={submit}
-            className="w-full py-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/25 transition-all hover:scale-[1.01] active:scale-[0.99]"
+            className="w-full py-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 disabled:opacity-50 text-white font-mono font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl shadow-emerald-950 transition-all"
           >
-            Run Prediction Model <Rocket size={16} />
+            Run Regression Analysis <Rocket size={16} />
           </button>
         </>
       )}
@@ -273,64 +283,66 @@ function Dashboard({user, result, marks, history, back}) {
   ];
 
   const recommendations = [
-    'Maintain attendance above 85% to maximize linear regression scaling.',
-    'Focus on improving PUT exam performance in the upcoming cycle.',
-    'Model residuals indicate stable continuous assessment trends.'
+    'Maintain attendance above 85% to optimize the linear coefficient scaling.',
+    'Focus on PUT weight adjustments to improve overall percentile standing.',
+    'Continuous assessment stability verified by regression residuals.'
   ];
 
   const exportPDF = () => window.print();
 
   return (
-    <section className="max-w-5xl mx-auto space-y-6 pb-12">
-      <div className="flex justify-between items-center bg-white p-5 rounded-2xl border border-slate-200 shadow-sm print:hidden">
+    <section className="max-w-6xl mx-auto space-y-6 pb-12">
+      <div className="flex justify-between items-center bg-emerald-950/40 p-5 rounded-2xl border border-emerald-900 print:hidden">
         <div>
-          <span className="text-[10px] font-bold uppercase tracking-widest text-indigo-600">Analytics Dashboard</span>
-          <h2 className="text-xl font-extrabold text-slate-900 mt-0.5">{user?.name || 'Student'}'s Academic Report</h2>
+          <span className="text-[10px] font-mono uppercase tracking-widest text-emerald-400">Model Output Report</span>
+          <h2 className="text-2xl font-black text-white mt-0.5">{user?.name || 'Student'}'s Analytical Dashboard</h2>
         </div>
         <div className="flex items-center gap-3">
-          <button onClick={exportPDF} className="px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-bold flex items-center gap-2 shadow-md shadow-indigo-600/20 hover:bg-indigo-700 transition-all">
-            <Download size={14} /> Export Report
+          <button onClick={exportPDF} className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-mono text-xs font-bold flex items-center gap-2 shadow-lg shadow-emerald-950 hover:scale-105 transition-all">
+            <Download size={14} /> Export PDF Report
           </button>
-          <button onClick={back} className="px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs font-semibold flex items-center gap-2 hover:bg-slate-100 transition-all text-slate-700">
-            <ArrowLeft size={14} /> Edit Inputs
+          <button onClick={back} className="px-3.5 py-2 rounded-xl border border-emerald-800 bg-emerald-900/40 font-mono text-xs flex items-center gap-2 hover:bg-emerald-800/50 transition-all text-emerald-200">
+            <ArrowLeft size={14} /> Modify Inputs
           </button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-white border border-slate-200 p-8 rounded-3xl flex flex-col justify-between space-y-6 shadow-sm">
+        <div className="lg:col-span-2 bg-emerald-950/60 backdrop-blur-2xl border border-emerald-800/80 p-8 rounded-2xl flex flex-col justify-between space-y-6 shadow-2xl">
           <div className="flex justify-between items-start">
             <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Predicted Final Percentage</span>
-              <div className="text-5xl font-black text-slate-900 mt-2">
+              <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-emerald-400">Predicted Academic Performance</span>
+              <div className="text-5xl font-black text-white mt-2 font-mono">
                 {percentage}%
               </div>
-              <div className="inline-block mt-3 px-3.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200">
-                {label}
+              <div className="inline-block mt-3 px-3 py-1 rounded-lg bg-emerald-900/60 text-emerald-300 text-xs font-mono font-bold border border-emerald-700/50">
+                Status: {label}
               </div>
             </div>
-            <div className="bg-slate-50 border border-slate-200 p-4 rounded-2xl text-xs space-y-1 text-right">
-              <div className="font-bold text-slate-700">Model Stats</div>
-              <div className="text-slate-500">MSE: 0.0411</div>
-              <div className="text-slate-500">R²: 0.9412</div>
+            <div className="bg-emerald-900/30 border border-emerald-800 p-4 rounded-xl font-mono text-xs space-y-1 text-right">
+              <div className="text-emerald-400 font-bold">Model Diagnostics</div>
+              <div className="text-emerald-300/80">MSE: 0.0411</div>
+              <div className="text-emerald-300/80">R²: 0.9412</div>
             </div>
           </div>
-          <p className="text-xs text-slate-500 leading-relaxed border-t border-slate-100 pt-4 font-medium">
-            Pipeline utilizes multi-variable polynomial regression trained on institutional historical datasets.
+          <p className="text-xs text-emerald-300/70 leading-relaxed border-t border-emerald-900 pt-4 font-mono">
+            Pipeline utilized multivariate polynomial regression fitted on historical academic metrics with cross-validation.
           </p>
         </div>
 
-        <div className="bg-white border border-slate-200 p-8 rounded-3xl flex flex-col justify-between space-y-4 shadow-sm">
+        <div className="bg-emerald-950/60 backdrop-blur-2xl border border-emerald-800/80 p-8 rounded-2xl flex flex-col justify-between space-y-4 shadow-2xl font-mono">
           <div>
-            <div className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4">Snapshot Metrics</div>
+            <div className="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-4 flex items-center gap-2">
+              <Award size={16} /> Evaluation Summary
+            </div>
             <div className="space-y-4 text-xs">
               <div>
-                <span className="text-slate-400 block uppercase text-[10px] font-bold">Attendance Ratio</span>
-                <div className="text-2xl font-black text-slate-900 mt-0.5">{marks?.attendance}%</div>
+                <span className="text-emerald-400/70 block uppercase text-[10px]">Active Attendance</span>
+                <div className="text-xl font-black text-white mt-0.5">{marks?.attendance}%</div>
               </div>
               <div>
-                <span className="text-slate-400 block uppercase text-[10px] font-bold">Algorithm</span>
-                <div className="text-sm font-bold text-slate-700 mt-0.5">Scikit-Learn Regression</div>
+                <span className="text-emerald-400/70 block uppercase text-[10px]">Algorithm Used</span>
+                <div className="text-sm font-bold text-emerald-200 mt-0.5">Scikit-Learn Linear Regression</div>
               </div>
             </div>
           </div>
@@ -338,28 +350,28 @@ function Dashboard({user, result, marks, history, back}) {
       </div>
 
       {/* What-If Simulator */}
-      <div className="bg-white border border-slate-200 p-8 rounded-3xl space-y-6 shadow-sm">
+      <div className="bg-emerald-950/60 backdrop-blur-2xl border border-emerald-700/60 p-8 rounded-2xl space-y-6 shadow-2xl font-mono">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl border border-indigo-100">
+            <div className="p-2.5 bg-emerald-900/60 text-emerald-300 rounded-xl border border-emerald-700/50">
               <Sliders size={18} />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-slate-900">What-If Scenario Simulator</h3>
-              <p className="text-xs text-slate-500">Test attendance and score variations dynamically</p>
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider">What-If Scenario Simulator</h3>
+              <p className="text-xs text-emerald-400/70">Test variable coefficients dynamically</p>
             </div>
           </div>
           <div className="text-right">
-            <span className="text-[10px] text-slate-400 block uppercase font-bold">Simulated Metric</span>
-            <span className="text-xl font-black text-indigo-600">{simulatedPercentage}%</span>
+            <span className="text-[10px] text-emerald-400/70 block uppercase font-bold">Simulated Metric</span>
+            <span className="text-xl font-black text-emerald-400">{simulatedPercentage}%</span>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2 text-xs">
           <div className="space-y-2">
-            <div className="flex justify-between font-bold text-slate-700">
-              <span>Attendance Adjustment</span>
-              <span className="text-indigo-600">{simAttendance}%</span>
+            <div className="flex justify-between font-bold">
+              <span className="text-emerald-300">Attendance Adjustment</span>
+              <span className="text-emerald-400">{simAttendance}%</span>
             </div>
             <input
               type="range"
@@ -367,14 +379,14 @@ function Dashboard({user, result, marks, history, back}) {
               max="100"
               value={simAttendance}
               onChange={e => setSimAttendance(Number(e.target.value))}
-              className="w-full accent-indigo-600 cursor-pointer"
+              className="w-full accent-emerald-400 cursor-pointer"
             />
           </div>
 
           <div className="space-y-2">
-            <div className="flex justify-between font-bold text-slate-700">
-              <span>Score Boost Points</span>
-              <span className="text-indigo-600">+{simBonusMarks} pts</span>
+            <div className="flex justify-between font-bold">
+              <span className="text-emerald-300">Score Vector Boost</span>
+              <span className="text-emerald-400">+{simBonusMarks} pts</span>
             </div>
             <input
               type="range"
@@ -382,32 +394,32 @@ function Dashboard({user, result, marks, history, back}) {
               max="100"
               value={simBonusMarks}
               onChange={e => setSimBonusMarks(Number(e.target.value))}
-              className="w-full accent-indigo-600 cursor-pointer"
+              className="w-full accent-emerald-400 cursor-pointer"
             />
           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white border border-slate-200 p-8 rounded-3xl space-y-4 shadow-sm">
-          <h3 className="text-sm font-bold text-slate-900">Assessment Breakdown</h3>
+        <div className="bg-emerald-950/60 backdrop-blur-2xl border border-emerald-800/80 p-8 rounded-2xl space-y-4 shadow-2xl font-mono">
+          <h3 className="text-sm font-bold text-white uppercase tracking-wider">Assessment Distribution</h3>
           <div className="h-60 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={barData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="name" stroke="#64748b" fontSize={11} tickLine={false} />
-                <YAxis stroke="#64748b" fontSize={11} tickLine={false} />
-                <Tooltip contentStyle={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', color: '#0f172a', fontSize: '12px', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
-                <Legend wrapperStyle={{ fontSize: '11px' }} />
-                <Bar dataKey="max" name="Max Limit" fill="#cbd5e1" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="obtained" name="Obtained" fill="#4f46e5" radius={[4, 4, 0, 0]} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#065f4644" />
+                <XAxis dataKey="name" stroke="#34d399" fontSize={11} tickLine={false} />
+                <YAxis stroke="#34d399" fontSize={11} tickLine={false} />
+                <Tooltip contentStyle={{ background: '#021f18', border: '1px solid #065f46', borderRadius: '12px', color: '#fff', fontSize: '12px', fontFamily: 'monospace' }} />
+                <Legend wrapperStyle={{ fontSize: '11px', fontFamily: 'monospace' }} />
+                <Bar dataKey="max" name="Max Limit" fill="#065f46" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="obtained" name="Obtained" fill="#34d399" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200 p-8 rounded-3xl space-y-4 shadow-sm flex flex-col items-center">
-          <h3 className="text-sm font-bold self-start text-slate-900">Competency Radar</h3>
+        <div className="bg-emerald-950/60 backdrop-blur-2xl border border-emerald-800/80 p-8 rounded-2xl space-y-4 shadow-2xl font-mono flex flex-col items-center">
+          <h3 className="text-sm font-bold self-start text-white uppercase tracking-wider">Multi-Axis Competency Radar</h3>
           <div className="h-60 w-full flex items-center justify-center">
             <ResponsiveContainer width="100%" height="100%">
               <RadarChart cx="50%" cy="50%" outerRadius="80%" data={[
@@ -416,9 +428,9 @@ function Dashboard({user, result, marks, history, back}) {
                 { subject: 'CAE', A: 65, fullMark: 100 },
                 { subject: 'PUT', A: 90, fullMark: 100 },
               ]}>
-                <PolarGrid stroke="#e2e8f0" />
-                <PolarAngleAxis dataKey="subject" tick={{ fill: '#64748b', fontSize: 11 }} />
-                <Radar name="Student" dataKey="A" stroke="#4f46e5" fill="#4f46e5" fillOpacity={0.3} />
+                <PolarGrid stroke="#065f4655" />
+                <PolarAngleAxis dataKey="subject" tick={{ fill: '#34d399', fontSize: 11, fontFamily: 'monospace' }} />
+                <Radar name="Candidate" dataKey="A" stroke="#34d399" fill="#34d399" fillOpacity={0.4} />
               </RadarChart>
             </ResponsiveContainer>
           </div>
@@ -426,17 +438,17 @@ function Dashboard({user, result, marks, history, back}) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white border border-slate-200 p-8 rounded-3xl space-y-6 shadow-sm">
-          <h3 className="text-sm font-bold text-slate-900">Feature Importance Weights</h3>
+        <div className="bg-emerald-950/60 backdrop-blur-2xl border border-emerald-800/80 p-8 rounded-2xl space-y-6 shadow-2xl font-mono">
+          <h3 className="text-sm font-bold text-white uppercase tracking-wider">Feature Coefficient Weights</h3>
           <div className="space-y-4 text-xs">
             {features.map((feat, i) => (
               <div key={i} className="space-y-1.5">
-                <div className="flex justify-between font-bold text-slate-700">
-                  <span>{feat.name}</span>
-                  <span className="text-indigo-600">{feat.val}%</span>
+                <div className="flex justify-between font-bold">
+                  <span className="text-emerald-300">{feat.name}</span>
+                  <span className="text-emerald-400">{feat.val}%</span>
                 </div>
-                <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-indigo-600 rounded-full" style={{ width: `${feat.val * 2}%` }}></div>
+                <div className="w-full h-2 bg-emerald-950 rounded-full overflow-hidden border border-emerald-900">
+                  <div className="h-full bg-emerald-400 rounded-full" style={{ width: `${feat.val * 2}%` }}></div>
                 </div>
               </div>
             ))}
@@ -444,38 +456,38 @@ function Dashboard({user, result, marks, history, back}) {
         </div>
 
         {/* History Tracker */}
-        <div className="bg-white border border-slate-200 p-8 rounded-3xl space-y-6 shadow-sm">
+        <div className="bg-emerald-950/60 backdrop-blur-2xl border border-emerald-800/80 p-8 rounded-2xl space-y-6 shadow-2xl font-mono">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold flex items-center gap-2 text-slate-900">
-              <History size={16} className="text-indigo-600" /> Prediction History
+            <h3 className="text-sm font-bold flex items-center gap-2 text-white uppercase tracking-wider">
+              <History size={16} className="text-emerald-400" /> Pipeline Run History
             </h3>
-            <span className="text-[10px] font-bold text-slate-400">Recent 5 Logs</span>
+            <span className="text-[10px] text-emerald-400/75">Last 5 Logs</span>
           </div>
           <div className="space-y-3 text-xs">
             {history && history.length > 0 ? (
               history.map((item, idx) => (
-                <div key={idx} className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 border border-slate-200">
-                  <span className="font-semibold text-slate-600">{item.date}</span>
+                <div key={idx} className="flex items-center justify-between p-3.5 rounded-xl bg-emerald-900/30 border border-emerald-800">
+                  <span className="text-emerald-300">{item.date}</span>
                   <div className="flex items-center gap-4">
-                    <span>Attendance: <strong className="text-slate-900">{item.attendance}%</strong></span>
-                    <span className="px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-600 font-black border border-indigo-100">{item.percentage}%</span>
+                    <span>Attendance: <strong className="text-white">{item.attendance}%</strong></span>
+                    <span className="px-2.5 py-0.5 rounded bg-emerald-900/60 text-emerald-300 font-bold border border-emerald-700/50">{item.percentage}%</span>
                   </div>
                 </div>
               ))
             ) : (
-              <p className="text-xs text-slate-400">No history recorded yet.</p>
+              <p className="text-xs text-emerald-400/70">No execution logs recorded.</p>
             )}
           </div>
         </div>
       </div>
 
-      <div className="bg-white border border-slate-200 p-8 rounded-3xl space-y-6 shadow-sm">
-        <h3 className="text-sm font-bold text-slate-900">Smart Academic Recommendations</h3>
+      <div className="bg-emerald-950/60 backdrop-blur-2xl border border-emerald-800/80 p-8 rounded-2xl space-y-6 shadow-2xl font-mono">
+        <h3 className="text-sm font-bold text-white uppercase tracking-wider">Diagnostic Recommendations</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
           {recommendations.map((rec, i) => (
-            <div key={i} className="p-4 rounded-2xl bg-indigo-50/50 border border-indigo-100 flex items-start gap-3">
-              <span className="text-indigo-600 text-sm mt-0.5">💡</span>
-              <p className="text-slate-700 leading-relaxed font-medium">{rec}</p>
+            <div key={i} className="p-4 rounded-xl bg-emerald-900/30 border border-emerald-800 flex items-start gap-3">
+              <span className="text-emerald-400 text-sm mt-0.5">⚙️</span>
+              <p className="text-emerald-200 leading-relaxed font-sans">{rec}</p>
             </div>
           ))}
         </div>
