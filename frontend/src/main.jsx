@@ -33,8 +33,7 @@ function App() {
     if (!marksOk) return;
     setLoading(true);
     try {
-      // REPLACE 'https://your-render-backend-url.onrender.com' WITH YOUR ACTUAL RENDER BACKEND URL BELOW:
-     const r = await fetch('https://student-performance-predictor-eyva.onrender.com/api/predict', {
+      const r = await fetch('https://student-performance-predictor-eyva.onrender.com/api/predict', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
@@ -190,6 +189,8 @@ function Marks({user, marks, setMarks, ok, back, submit, loading}) {
 }
 
 function Dashboard({user, result, back}) {
+  const data = result.prediction || result;
+
   return (
     <section className="max-w-4xl mx-auto space-y-8">
       <div className="flex justify-between items-center">
@@ -202,12 +203,35 @@ function Dashboard({user, result, back}) {
         </button>
       </div>
 
-      <div className="glass p-8 rounded-3xl space-y-4 text-center">
-        <span className="text-xs font-semibold uppercase tracking-widest text-slate-500">Predicted Score / Status</span>
-        <div className="text-5xl font-extrabold text-indigo-600 dark:text-indigo-400">
-          {JSON.stringify(result.prediction || result)}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="glass p-8 rounded-3xl space-y-3 flex flex-col justify-center items-center text-center">
+          <span className="text-xs font-semibold uppercase tracking-widest text-slate-500">Predicted Percentage</span>
+          <div className="text-6xl font-extrabold text-indigo-600 dark:text-indigo-400">
+            {typeof data.predicted_percentage === 'number' ? data.predicted_percentage.toFixed(2) : data.predicted_percentage}%
+          </div>
+        </div>
+
+        <div className="glass p-8 rounded-3xl space-y-3 flex flex-col justify-center items-center text-center">
+          <span className="text-xs font-semibold uppercase tracking-widest text-slate-500">Academic Status</span>
+          <div className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
+            {data.label || 'N/A'}
+          </div>
         </div>
       </div>
+
+      {data.recommendations && data.recommendations.length > 0 && (
+        <div className="glass p-6 rounded-3xl space-y-4">
+          <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-500">Actionable Recommendations</h3>
+          <ul className="space-y-2">
+            {data.recommendations.map((rec, index) => (
+              <li key={index} className="flex items-start gap-2 text-sm">
+                <span className="text-indigo-600 font-bold">•</span>
+                <span>{rec}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </section>
   );
 }
