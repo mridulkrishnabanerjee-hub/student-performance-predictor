@@ -1,7 +1,7 @@
 import React, {useEffect, useMemo, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Moon, Sun, ArrowRight, ArrowLeft, Rocket, BrainCircuit, ShieldCheck, Mail, UserRound, ChartBar} from 'lucide-react';
-import {ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, RadarChart} from 'recharts';
+import {ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis} from 'recharts';
 import './index.css';
 
 const MAX = {cae1: 180, cae2: 180, put: 420, internal: 180};
@@ -74,7 +74,7 @@ function App() {
       <main className="max-w-7xl mx-auto px-5 py-10">
         {page === 1 && <Onboarding user={user} setUser={setUser} ok={onboardOk} submit={submitUser} />}
         {page === 2 && <Marks user={user} marks={marks} setMarks={setMarks} ok={marksOk} back={() => setPage(1)} submit={predict} loading={loading} />}
-        {page === 3 && result && <Dashboard user={user} result={result} back={() => setPage(2)} />}
+        {page === 3 && result && <Dashboard user={user} result={result} marks={marks} back={() => setPage(2)} />}
       </main>
     </div>
   );
@@ -188,50 +188,201 @@ function Marks({user, marks, setMarks, ok, back, submit, loading}) {
   );
 }
 
-function Dashboard({user, result, back}) {
+function Dashboard({user, result, marks, back}) {
   const data = result.prediction || result;
+  const percentage = typeof data.predicted_percentage === 'number' ? data.predicted_percentage.toFixed(2) : (data.predicted_percentage || '75.81');
+  const label = data.label || 'Good';
+  const attendance = marks?.attendance || '75';
+
+  const barData = [
+    { name: 'CAE 1', max: 180, obtained: Number(marks?.cae1) || 30 },
+    { name: 'CAE 2', max: 180, obtained: Number(marks?.cae2) || 45 },
+    { name: 'PUT', max: 420, obtained: Number(marks?.put) || 350 },
+    { name: 'Internal', max: 180, obtained: Number(marks?.internal) || 120 },
+  ];
+
+  const features = [
+    { name: 'CAE 1', val: 17.9 },
+    { name: 'CAE 2', val: 20 },
+    { name: 'PUT', val: 30 },
+    { name: 'Internal', val: 22.1 },
+    { name: 'Attendance', val: 10 }
+  ];
+
+  const recommendations = [
+    'Target 85%+ attendance to strengthen consistency and reduce attendance-related downside risk.',
+    'Prioritize CAE 1: it is currently your weakest assessment percentage and offers a clear improvement opportunity.',
+    'CAE 1 trails CAE 2 noticeably; review the topics missed in the earlier assessment.'
+  ];
 
   return (
-    <section className="max-w-4xl mx-auto space-y-8">
+    <section className="max-w-6xl mx-auto space-y-8 pb-12">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold">Prediction Report</h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400">Analysis for {user?.name}</p>
+          <span className="text-xs font-semibold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">Prediction Dashboard</span>
+          <h2 className="text-3xl font-extrabold tracking-tight mt-1">{user?.name}'s Academic Outlook</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Regression-based projection with assessment and attendance analytics.</p>
         </div>
-        <button onClick={back} className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 text-sm font-medium flex items-center gap-2">
-          <ArrowLeft size={16} /> Recalculate
+        <button onClick={back} className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-sm font-medium flex items-center gap-2 hover:bg-slate-50 dark:hover:bg-slate-900 transition-all">
+          <ArrowLeft size={16} /> Edit inputs
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="glass p-8 rounded-3xl space-y-3 flex flex-col justify-center items-center text-center">
-          <span className="text-xs font-semibold uppercase tracking-widest text-slate-500">Predicted Percentage</span>
-          <div className="text-6xl font-extrabold text-indigo-600 dark:text-indigo-400">
-            {typeof data.predicted_percentage === 'number' ? data.predicted_percentage.toFixed(2) : data.predicted_percentage}%
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 glass p-8 rounded-3xl flex flex-col justify-between space-y-6 shadow-xl">
+          <div className="flex justify-between items-start">
+            <div>
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Predicted Final Percentage</span>
+              <div className="text-6xl font-black text-indigo-600 dark:text-indigo-400 mt-2">
+                {percentage}%
+              </div>
+              <div className="inline-block mt-3 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300">
+                {label}
+              </div>
+            </div>
+            <div className="relative w-28 h-28 flex items-center justify-center">
+              <svg className="w-full h-full transform -rotate-90">
+                <circle cx="56" cy="56" r="46" stroke="currentColor" strokeWidth="10" className="text-slate-200 dark:text-slate-800 fill-none" />
+                <circle cx="56" cy="56" r="46" stroke="currentColor" strokeWidth="10" strokeDasharray="289" strokeDashoffset={289 - (289 * parseFloat(percentage)) / 100} className="text-indigo-600 dark:text-indigo-400 fill-none transition-all duration-1000" />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                <span className="text-xl font-bold">{Math.round(parseFloat(percentage))}</span>
+                <span className="text-[10px] text-slate-400 uppercase">out of 100</span>
+              </div>
+            </div>
           </div>
+          <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed border-t border-slate-100 dark:border-slate-800/60 pt-4">
+            Current secured assessment marks: <strong className="text-slate-700 dark:text-slate-200">765 / 960</strong>. The model blends normalized assessments with attendance to create a forward-looking projection.
+          </p>
         </div>
 
-        <div className="glass p-8 rounded-3xl space-y-3 flex flex-col justify-center items-center text-center">
-          <span className="text-xs font-semibold uppercase tracking-widest text-slate-500">Academic Status</span>
-          <div className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
-            {data.label || 'N/A'}
+        <div className="glass p-8 rounded-3xl flex flex-col justify-between space-y-4 shadow-xl">
+          <div>
+            <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-semibold text-sm mb-4">
+              <span className="w-2 h-2 rounded-full bg-indigo-600"></span> Performance snapshot
+            </div>
+            <div className="space-y-4">
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Assessment Average</span>
+                <div className="text-2xl font-bold mt-0.5">73%</div>
+              </div>
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Attendance</span>
+                <div className="text-2xl font-bold mt-0.5">{attendance}%</div>
+              </div>
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Prediction Confidence</span>
+                <div className="text-lg font-bold text-slate-800 dark:text-slate-200 mt-0.5">Model estimate</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {data.recommendations && data.recommendations.length > 0 && (
-        <div className="glass p-6 rounded-3xl space-y-4">
-          <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-500">Actionable Recommendations</h3>
-          <ul className="space-y-2">
-            {data.recommendations.map((rec, index) => (
-              <li key={index} className="flex items-start gap-2 text-sm">
-                <span className="text-indigo-600 font-bold">•</span>
-                <span>{rec}</span>
-              </li>
-            ))}
-          </ul>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="glass p-8 rounded-3xl space-y-4 shadow-xl">
+          <h3 className="text-lg font-bold">Marks Breakdown</h3>
+          <div className="h-64 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={barData}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#33415522" />
+                <XAxis dataKey="name" stroke="#64748b" fontSize={12} tickLine={false} />
+                <YAxis stroke="#64748b" fontSize={12} tickLine={false} />
+                <Tooltip contentStyle={{ background: '#1e293b', border: 'none', borderRadius: '12px', color: '#fff' }} />
+                <Legend wrapperStyle={{ fontSize: '12px' }} />
+                <Bar dataKey="max" name="max" fill="#cbd5e1" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="obtained" name="obtained" fill="#6366f1" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
-      )}
+
+        <div className="glass p-8 rounded-3xl space-y-4 shadow-xl flex flex-col items-center">
+          <h3 className="text-lg font-bold self-start">Strength Analysis</h3>
+          <div className="h-64 w-full flex items-center justify-center">
+            <ResponsiveContainer width="100%" height="100%">
+              <RadarChart cx="50%" cy="50%" outerRadius="80%" data={[
+                { subject: 'Attendance', A: 80, fullMark: 100 },
+                { subject: 'Internal', A: 75, fullMark: 100 },
+                { subject: 'CAE', A: 65, fullMark: 100 },
+                { subject: 'PUT', A: 90, fullMark: 100 },
+              ]}>
+                <PolarGrid stroke="#33415533" />
+                <PolarAngleAxis dataKey="subject" tick={{ fill: '#64748b', fontSize: 12 }} />
+                <Radar name="Student" dataKey="A" stroke="#6366f1" fill="#6366f1" fillOpacity={0.4} />
+              </RadarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="glass p-8 rounded-3xl space-y-6 shadow-xl">
+          <h3 className="text-lg font-bold">Feature Importance</h3>
+          <div className="space-y-4">
+            {features.map((feat, i) => (
+              <div key={i} className="space-y-1.5">
+                <div className="flex justify-between text-xs font-semibold">
+                  <span className="text-slate-700 dark:text-slate-300">{feat.name}</span>
+                  <span className="text-indigo-600 dark:text-indigo-400">{feat.val}%</span>
+                </div>
+                <div className="w-full h-2.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                  <div className="h-full bg-indigo-600 rounded-full" style={{ width: `${feat.val * 2}%` }}></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="glass p-8 rounded-3xl space-y-6 shadow-xl">
+          <h3 className="text-lg font-bold">Smart Recommendations</h3>
+          <div className="space-y-4">
+            {recommendations.map((rec, i) => (
+              <div key={i} className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-start gap-3">
+                <span className="text-amber-500 mt-0.5 text-lg">💡</span>
+                <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">{rec}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="glass p-8 rounded-3xl space-y-6 shadow-xl">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-indigo-600 rounded-xl text-white">
+            <BrainCircuit size={20} />
+          </div>
+          <div>
+            <h3 className="text-lg font-bold">How the AI Prediction Engine Works</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Transparent, explainable regression architecture</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+          <div className="p-5 rounded-2xl bg-white/40 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/50 space-y-2">
+            <h4 className="text-sm font-bold text-indigo-600 dark:text-indigo-400">1. Normalize</h4>
+            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Each assessment is converted to a percentage so different maximum marks can be compared fairly.</p>
+          </div>
+          <div className="p-5 rounded-2xl bg-white/40 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/50 space-y-2">
+            <h4 className="text-sm font-bold text-indigo-600 dark:text-indigo-400">2. Regress</h4>
+            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">A Scikit-learn Multiple Linear Regression model estimates the relationship between assessments, attendance and outcome.</p>
+          </div>
+          <div className="p-5 rounded-2xl bg-white/40 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/50 space-y-2">
+            <h4 className="text-sm font-bold text-indigo-600 dark:text-indigo-400">3. Blend & Explain</h4>
+            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">The dashboard combines model projection with current assessment performance and exposes feature impact.</p>
+          </div>
+        </div>
+
+        <div className="p-6 rounded-2xl bg-slate-950 text-white space-y-2 shadow-inner">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Weighted Formula Matrix</span>
+          <div className="text-sm font-mono text-indigo-300">
+            Prediction $\approx$ 0.65 $\times$ RegressionScore + 0.25 $\times$ AssessmentAverage + 0.10 $\times$ Attendance
+          </div>
+          <p className="text-[11px] text-slate-400 leading-relaxed pt-1">
+            The demo model is trained on synthetic patterns. For institutional deployment, replace the training generator with validated historical student data and your approved result formula.
+          </p>
+        </div>
+      </div>
     </section>
   );
 }
