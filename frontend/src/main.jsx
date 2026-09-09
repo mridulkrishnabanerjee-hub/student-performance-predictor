@@ -189,9 +189,10 @@ function Marks({user, marks, setMarks, ok, back, submit, loading}) {
 }
 
 function Dashboard({user, result, marks, back}) {
-  const data = result.prediction || result;
-  const percentage = typeof data.predicted_percentage === 'number' ? data.predicted_percentage.toFixed(2) : (data.predicted_percentage || '75.81');
-  const label = data.label || 'Good';
+  const rawData = result?.prediction || result || {};
+  const percentageVal = rawData.predicted_percentage ?? rawData.percentage ?? 75.81;
+  const percentage = typeof percentageVal === 'number' ? percentageVal.toFixed(2) : String(percentageVal);
+  const label = rawData.label || 'Good';
   const attendance = marks?.attendance || '75';
 
   const barData = [
@@ -220,7 +221,7 @@ function Dashboard({user, result, marks, back}) {
       <div className="flex justify-between items-center">
         <div>
           <span className="text-xs font-semibold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">Prediction Dashboard</span>
-          <h2 className="text-3xl font-extrabold tracking-tight mt-1">{user?.name}'s Academic Outlook</h2>
+          <h2 className="text-3xl font-extrabold tracking-tight mt-1">{user?.name || 'Student'}'s Academic Outlook</h2>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Regression-based projection with assessment and attendance analytics.</p>
         </div>
         <button onClick={back} className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-sm font-medium flex items-center gap-2 hover:bg-slate-50 dark:hover:bg-slate-900 transition-all">
