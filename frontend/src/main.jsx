@@ -34,7 +34,7 @@ function App() {
     setLoading(true);
     try {
       // REPLACE 'https://your-render-backend-url.onrender.com' WITH YOUR ACTUAL RENDER BACKEND URL BELOW:
-     const r = await fetch('https://student-performance-predictor-eyva.onrender.com/predict', {
+     const r = await fetch('https://student-performance-predictor-eyva.onrender.com/api/predict', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
