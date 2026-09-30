@@ -13,7 +13,7 @@ const EMPTY = { studyHours: '', attendance: '', previousScore: '', sleepHours: '
 
 function bandFor(score) {
   if (score >= 85) return { label: 'Excellent', tone: 'text-emerald-700', bar: '#059669', note: 'Strong outlook. Keep the current routine.' };
-  if (score >= 70) return { label: 'Good', tone: 'text-teal-700', bar: '#0d9488', note: 'On track. Small gains are possible.' };
+  if (score >= 70) return { label: 'Good', tone: 'text-blue-700', bar: '#1d4ed8', note: 'On track. Small gains are possible.' };
   if (score >= 50) return { label: 'Average', tone: 'text-amber-700', bar: '#d97706', note: 'Room to improve with more consistency.' };
   return { label: 'At risk', tone: 'text-rose-700', bar: '#e11d48', note: 'Needs support. Review study time and attendance.' };
 }
@@ -90,7 +90,7 @@ export default function App() {
   const band = numeric ? bandFor(score) : null;
 
   const inputCls =
-    'w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 pr-14 text-sm text-slate-900 placeholder-slate-400 shadow-sm focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20';
+    'w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 pr-14 text-sm text-slate-900 placeholder-slate-400 shadow-sm focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20';
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-sans">
@@ -98,21 +98,21 @@ export default function App() {
       <header className="bg-white border-b border-slate-200">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-lg bg-slate-900 text-white grid place-items-center text-lg" aria-hidden="true">🎓</div>
+            <div className="h-9 w-9 rounded-lg bg-blue-950 text-white grid place-items-center text-lg" aria-hidden="true">🎓</div>
             <div className="leading-tight">
               <p className="text-base font-semibold text-slate-900">EduPredict</p>
               <p className="text-xs text-slate-500">Student performance forecasting</p>
             </div>
           </div>
           <span className="hidden sm:inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
-            <span className="h-1.5 w-1.5 rounded-full bg-teal-600" />
+            <span className="h-1.5 w-1.5 rounded-full bg-blue-600" />
             Regression model
           </span>
         </div>
       </header>
 
       {/* Intro band */}
-      <section className="bg-slate-900">
+      <section className="bg-blue-950">
         <div className="max-w-6xl mx-auto px-6 py-10 sm:py-12">
           <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight max-w-2xl">
             Forecast a student's exam score from four everyday habits
@@ -178,7 +178,7 @@ export default function App() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 rounded-lg bg-teal-700 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-teal-800 disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-teal-600 focus:ring-offset-2"
+                  className="flex-1 rounded-lg bg-blue-700 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-800 disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
                 >
                   {loading ? 'Predicting...' : 'Predict score'}
                 </button>
